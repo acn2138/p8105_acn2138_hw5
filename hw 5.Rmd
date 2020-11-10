@@ -1,0 +1,69 @@
+---
+title: "HW 5"
+author: "Amanda Nagle"
+date: "11/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Problem 1
+
+
+```{r cars}
+homicide_df = 
+  read_csv("homicide-data.csv") %>%
+  mutate( city_state = str_c(city, state, sep = "_"),
+    resolved = case_when(
+      disposition == "Closed without arrest" ~ "unsolved",
+      disposition == "Open/No arrest" ~ "unsolved",
+      disposition == "Closed by arrest" ~ "solved",
+    )
+  ) %>%
+  filter(city_state != "Tulsa_AL") %>%
+  select(city_state, resolved)
+```
+looking at the table
+
+```{r}
+agg_df = homicide_df %>%
+  group_by(city_state) %>%
+  summarize(hom_total = n(),
+            hom_unsolved = sum(resolved == "unsolved")
+            )
+```
+
+prop test on single city
+
+```{r}
+
+prop.test(
+  agg_df %>% filter(city_state == "Baltimore_MD") %>% pull(hom_unsolved),
+  agg_df %>% filter(city_state == "Baltimore_MD") %>% pull(hom_total)) %>%
+  broom::tidy()
+
+
+results_df = 
+  agg_df%>%
+  mutate(
+    prop_tests = map2(.x = hom_unsolved, .y = hom_total, ~prop.test(x=.x, n= .y)), tidy_tests = map(.x = prop_tests, ~broom::tidy(.x))
+  ) %>%
+  select(-prop_tests) %>%
+  unnest(tidy_tests) %>%
+  select(city_state, estimate, conf.low, conf.high)
+```
+
+```{r}
+results_df %>%
+  mutate(city_state = fct_reorder(city_state, estimate)) %>%
+  ggplot(aes(x = city_state, y= estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+}}
+
+
