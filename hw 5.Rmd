@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(purrr)
 ```
 
 ## Problem 1
@@ -64,6 +65,27 @@ results_df %>%
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
-}}
+
+## Problem 2
+
+```{r}
+path_df = 
+  tibble(
+    path = list.files("longitudinal study"),) %>%
+  mutate(
+    path = str_c("longitudinal study/", path),
+    data = map(path, read_csv)) %>%
+  unnest(data) %>%
+  mutate(group = substr(path, 20, 22), id = substr(path, 24, 25), id = str_c(group, id)) %>%
+  select(-path) %>%
+  pivot_longer(week_1:week_8, names_to = "week", names_prefix = "week_", values_to = "obs") %>%
+  mutate(week = as.factor(week), id = as.factor(id))%>% group_by(id)
+
+path_df %>%
+  ggplot(aes(x = week, y = obs, group = id, color = group)) +
+  geom_line()
+
+
+```
 
 
