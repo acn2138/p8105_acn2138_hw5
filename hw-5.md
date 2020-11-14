@@ -1,21 +1,11 @@
----
-title: "HW 5"
-author: "Amanda Nagle"
-date: "11/10/2020"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(tidyverse)
-library(purrr)
-library(patchwork)
-```
+HW 5
+================
+Amanda Nagle
+11/10/2020
 
 ## Problem 1
 
-
-```{r cars}
+``` r
 homicide_df = 
   read_csv("homicide-data.csv") %>%
   mutate( city_state = str_c(city, state, sep = "_"),
@@ -28,9 +18,26 @@ homicide_df =
   filter(city_state != "Tulsa_AL") %>%
   select(city_state, resolved)
 ```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   uid = col_character(),
+    ##   reported_date = col_double(),
+    ##   victim_last = col_character(),
+    ##   victim_first = col_character(),
+    ##   victim_race = col_character(),
+    ##   victim_age = col_character(),
+    ##   victim_sex = col_character(),
+    ##   city = col_character(),
+    ##   state = col_character(),
+    ##   lat = col_double(),
+    ##   lon = col_double(),
+    ##   disposition = col_character()
+    ## )
+
 looking at the table
 
-```{r}
+``` r
 agg_df = homicide_df %>%
   group_by(city_state) %>%
   summarize(hom_total = n(),
@@ -38,16 +45,23 @@ agg_df = homicide_df %>%
             )
 ```
 
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
 prop test on single city
 
-```{r}
-
+``` r
 prop.test(
   agg_df %>% filter(city_state == "Baltimore_MD") %>% pull(hom_unsolved),
   agg_df %>% filter(city_state == "Baltimore_MD") %>% pull(hom_total)) %>%
   broom::tidy()
+```
 
+    ## # A tibble: 1 x 8
+    ##   estimate statistic  p.value parameter conf.low conf.high method    alternative
+    ##      <dbl>     <dbl>    <dbl>     <int>    <dbl>     <dbl> <chr>     <chr>      
+    ## 1    0.646      239. 6.46e-54         1    0.628     0.663 1-sample~ two.sided
 
+``` r
 results_df = 
   agg_df%>%
   mutate(
@@ -58,7 +72,7 @@ results_df =
   select(city_state, estimate, conf.low, conf.high)
 ```
 
-```{r}
+``` r
 results_df %>%
   mutate(city_state = fct_reorder(city_state, estimate)) %>%
   ggplot(aes(x = city_state, y= estimate)) +
@@ -67,9 +81,11 @@ results_df %>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
+![](hw-5_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
 ## Problem 2
 
-```{r}
+``` r
 path_df = 
   tibble(
     path = list.files("longitudinal study"),) %>%
@@ -85,15 +101,17 @@ path_df =
 path_df %>%
   ggplot(aes(x = week, y = obs, group = id, color = group)) +
   geom_line()
-
-
 ```
 
-The experimental group's scores tend to increase from the beginning to the end of the study, while the control group's scores tend to stay the same of decrease. 
+![](hw-5_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+The experimental group’s scores tend to increase from the beginning to
+the end of the study, while the control group’s scores tend to stay the
+same of decrease.
 
 ## Problem 2
 
-```{r}
+``` r
 sim_mean_p = function(mu) {
   
   sim_data = tibble(
@@ -106,8 +124,14 @@ sim_mean_p = function(mu) {
 }
 
 sim_mean_p(0)
+```
 
+    ## # A tibble: 1 x 3
+    ##   estimate p.value reject
+    ##      <dbl>   <dbl> <lgl> 
+    ## 1    0.888   0.235 FALSE
 
+``` r
 sim_results = 
   tibble(mus = c(0, 1, 2, 3, 4, 5, 6)) %>% 
   mutate(
@@ -115,19 +139,35 @@ sim_results =
     estimate_dfs = map(output_lists, bind_rows)) %>% 
   select(-output_lists) %>% 
   unnest(estimate_dfs)
+```
 
+Plotting
+
+``` r
 sim_results %>% 
   group_by(mus) %>%
   summarise(chance_reject = mean(reject)) %>%
   ggplot(aes(x= mus, y= chance_reject)) +
   geom_col()
+```
 
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+![](hw-5_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+``` r
 sim_results %>% 
   group_by(mus) %>%
   summarise(avg_mean = mean(estimate)) %>%
   ggplot(aes(x= mus, y= avg_mean)) +
   geom_col()
+```
 
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+![](hw-5_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+
+``` r
 all_data = sim_results %>% 
   group_by(mus) %>%
   ggplot(aes(x= mus, y= estimate, group = mus)) +
@@ -139,6 +179,5 @@ rejected = sim_results %>%
   ggplot(aes(x= mus, y= estimate, group = mus)) +
   geom_boxplot()
 
-all_data + rejected
-
+both = all_data + rejected
 ```
