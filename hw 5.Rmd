@@ -145,6 +145,6 @@ rejected = sim_results %>%
   ggplot(aes(x= mus, y= estimate, group = mus)) +
   geom_boxplot()
 
-both = all_data + rejected
+all_data + rejected
 
 ```

@@ -129,7 +129,7 @@ sim_mean_p(0)
     ## # A tibble: 1 x 3
     ##   estimate p.value reject
     ##      <dbl>   <dbl> <lgl> 
-    ## 1    0.888   0.235 FALSE
+    ## 1    0.626   0.481 FALSE
 
 ``` r
 sim_results = 
@@ -179,5 +179,7 @@ rejected = sim_results %>%
   ggplot(aes(x= mus, y= estimate, group = mus)) +
   geom_boxplot()
 
-both = all_data + rejected
+all_data + rejected
 ```
+
+![](hw-5_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
