@@ -109,7 +109,7 @@ The experimental group’s scores tend to increase from the beginning to
 the end of the study, while the control group’s scores tend to stay the
 same of decrease.
 
-## Problem 2
+## Problem 3
 
 ``` r
 sim_mean_p = function(mu) {
@@ -129,7 +129,7 @@ sim_mean_p(0)
     ## # A tibble: 1 x 3
     ##   estimate p.value reject
     ##      <dbl>   <dbl> <lgl> 
-    ## 1    0.626   0.481 FALSE
+    ## 1   -0.466   0.632 FALSE
 
 ``` r
 sim_results = 
@@ -156,7 +156,7 @@ sim_results %>%
 ![](hw-5_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
-sim_results %>% 
+avg = sim_results %>% 
   group_by(mus) %>%
   summarise(avg_mean = mean(estimate)) %>%
   ggplot(aes(x= mus, y= avg_mean)) +
@@ -164,6 +164,21 @@ sim_results %>%
 ```
 
     ## `summarise()` ungrouping output (override with `.groups` argument)
+
+``` r
+avg_rej = sim_results %>% 
+  filter(reject == TRUE) %>%
+  group_by(mus) %>%
+  summarise(avg_mean = mean(estimate)) %>%
+  ggplot(aes(x= mus, y= avg_mean)) +
+  geom_col()
+```
+
+    ## `summarise()` ungrouping output (override with `.groups` argument)
+
+``` r
+avg + avg_rej
+```
 
 ![](hw-5_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
@@ -182,4 +197,7 @@ rejected = sim_results %>%
 all_data + rejected
 ```
 
-![](hw-5_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
+![](hw-5_files/figure-gfm/unnamed-chunk-7-3.png)<!-- --> For low mus,
+the mean estimate of the rejected samples are higher than the mean from
+all samples. This is because the higher means are more different than 0
+and more likely to be rejected.

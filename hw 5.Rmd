@@ -91,7 +91,7 @@ path_df %>%
 
 The experimental group's scores tend to increase from the beginning to the end of the study, while the control group's scores tend to stay the same of decrease. 
 
-## Problem 2
+## Problem 3
 
 ```{r}
 sim_mean_p = function(mu) {
@@ -128,11 +128,20 @@ sim_results %>%
   ggplot(aes(x= mus, y= chance_reject)) +
   geom_col()
 
-sim_results %>% 
+avg = sim_results %>% 
   group_by(mus) %>%
   summarise(avg_mean = mean(estimate)) %>%
   ggplot(aes(x= mus, y= avg_mean)) +
   geom_col()
+
+avg_rej = sim_results %>% 
+  filter(reject == TRUE) %>%
+  group_by(mus) %>%
+  summarise(avg_mean = mean(estimate)) %>%
+  ggplot(aes(x= mus, y= avg_mean)) +
+  geom_col()
+
+avg + avg_rej
 
 all_data = sim_results %>% 
   group_by(mus) %>%
@@ -148,3 +157,5 @@ rejected = sim_results %>%
 all_data + rejected
 
 ```
+For low mus, the mean estimate of the rejected samples are higher than the mean from all samples. This is because the higher means are more different than 0 and more likely to be rejected. 
+
